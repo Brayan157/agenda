@@ -1,99 +1,123 @@
+<?php
+    include "conectaBanco.php";
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
-
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title> Alteração de Usuarios </title>
+        <title> Cadastro de Usuarios </title>
         <link rel="stylesheet" href="css/bootstrap.css">
         <link rel="stylesheet" href="css/bootstrap-icons.css">
+        <script src="js/booststrap.bundle.js"></script>
         <script src="js/jquery-3-3-1.js"></script>
-        <script src="js/bootstrap.bundle.js"></script>
         <script src="js/jquery.validate.js"></script>
         <script src="js/messages_pt_BR.js"></script>
         <script src="js/pwstrength-bootstrap.js"></script>
 
+
         <style>
-            html {
+            html{
                 height: 100%;
             }
-
-            body {
-                background: url('img/dark-blue-background.jpg') no-repeat center fixed;
+            body{
+                background: url('img/dark-blue-background.jpg')
+                no-repeat center fixed;
                 background-size: cover;
                 height: 100%;
                 overflow-x: hidden;
             }
-        </style>
+        </style>    
+         
     </head>
-
     <body>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
-            <div class="container">
-                <a href="/main.html" class="navbar-brand"><img src="img/icone.svg" width="30" height="30"
-                    alt="agenda de contatos">
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"> <span
-                        class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbar">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false" id="menuCadastros">
-                                <i class="bi-card-list"></i> Cadastros
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="menuCadastros">
-                                <a class="dropdown-item" href="cadastroContato.html">
-                                    <i class="bi-person-fill"></i> Novo Contato
-                                </a>
-                                <a class="dropdown-item" href="listaContatos.html">
-                                    <i class="bi-list-ul"></i> Lista de contatos
-                                </a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false" id="menuConta">
-                                <i class="bi-gear-fill"></i> Minha Conta
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="menuConta">
-                                <a class="dropdown-item" href="alterarDados.html">
-                                    <i class="bi-pencil-square"></i> Alterar dados
-                                </a>
-                                <a class="dropdown-item" href="logout.php">
-                                    <i class="bi-door-open-fill"></i> Sair
-                                </a>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link " href="" data-toggle="modal" data-target="#modalSobreAplicacao">
-                                <i class="bi-info-circle"></i> Sobre
-                            </a>
-                        </li>
-                    </ul>
-                    <form action="listaContatos.html" class="form-inline my-2 my-lg-0" method="get">
-                        <input class="form-control mr-sm-2" type="search" name="busca" id="busca" placeholder="Pesquisar">
-                        <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Enviar</button>
-                    </form>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
-
-
         <div class="row h-100 align-items-center">
             <div class="container">
                 <div class="row">
                     <div class="col-sm"></div>
-                    <div class="col-sm-12">
+                    <div class="col-sm-10">
+                        <?php
+                            $flagErro = False;
+                            if (isset($_POST['acao'])) {
+                                $acao = $_POST['acao'];
+
+                                if ($acao == "salvar") {
+                                    $nomeUsuario = $_POST['nomeUsuario'];
+                                    $mailUsuario = $_POST['mailUsuario'];
+                                    $mail2Usuario = $_POST['mail2Usuario'];
+                                    $senhaUsuario = $_POST['senhaUsuario'];
+                                    $senha2Usuario = $_POST['senha2Usuario'];
+
+                                    if (!empty($nomeUsuario) && !empty($mailUsuario) && !empty($mail2Usuario) && !empty($senhaUsuario) && !empty($senha2Usuario)) {
+                                        if ($mailUsuario == $mail2Usuario && $senhaUsuario == $senha2Usuario) {
+                                            if(strlen($nomeUsuario) >= 5 && strlen($senhaUsuario)>=8){
+                                                $sqlUsuario = "SELECT codigoUsuario FROM usuarios WHERE mailUsuario = :mailUsuario";
+                                                $sqlUsuarioST = $conexao -> prepare($sqlUsuario);
+                                                $sqlUsuarioST->bindValue(':mailUsuario', $mailUsuario);
+                                                $sqlUsuarioST->execute();
+                                                $quantidadeUsuario = $sqlUsuarioST->rowCount();
+                                                if ($quantidadeUsuario == 0) {
+                                                    $senhaUsuarioMD5 = md5($senhaUsuario);
+                                                    
+                                                    $sqlNovoUsuario = "INSERT INTO usuarios (nomeUsuario, mailUsuario, senhaUsuario) Values
+                                                                        (:nomeUsuario, :mailUsuario, :senhaUsuario)";
+                
+                                                    $sqlNovoUsuarioST = $conexao -> prepare($sqlNovoUsuario);
+                                                    $sqlNovoUsuarioST->bindValue(':nomeUsuario', $nomeUsuario);
+                                                    $sqlNovoUsuarioST->bindValue(':mailUsuario', $mailUsuario);
+                                                    $sqlNovoUsuarioST->bindValue(':senhaUsuario', $senhaUsuarioMD5);
+                
+                                                    if ($sqlNovoUsuarioST-> execute()){
+                                                        $mensagemAcao = "Novo usúario cadastrado com sucesso";
+                                                    }
+                                                    else{
+                                                        $flagErro = TRUE;
+                                                        $mensagemAcao = "Código erro: ". $sqlNovoUsuarioST->errorCode();
+                                                    }
+                                                }
+                                                else{
+                                                    $flagErro = TRUE;
+                                                    $mensagemAcao = "E-mail já cadastrado";
+                                                }
+                                            }
+                                            else{
+                                                $flagErro = TRUE;
+                                                $mensagemAcao = "Quantidade minima de cada campo: Nome(5), senha (8).";
+                                            }
+                                        }else{
+                                            $flagErro = True;
+                                            $mensagemAcao = "Os campos de confirmação de e-mail e senha devem ser preenchidos com os reespectivos valores";
+                                        }
+                                    }
+                                    else{
+                                        $flagErro = True;
+                                        $mensagemAcao = "Preencha todos os campos obrigatorios (*)";
+                                    }
+
+                                    if (!$flagErro){
+                                        $classeMensagem = "alert-success";
+                                    }
+                                    else{
+                                        $classeMensagem = "alert-danger";
+                                    }
+                                    echo "<div class=\"alert $classeMensagem alert-dismissible fade show\" role=\"alert\">
+                                            $mensagemAcao
+                                            <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">
+                                            <span aria-hidden=\"true\">&times;</span>
+                                            </button>
+                                        </div>";
+
+                                }
+                            }
+                        ?>
                         <div class="card border-primary">
                             <div class="card-header bg-primary text-white" > 
-                                <h5> Alterar dados</h5>
+                                <h5> Cadastro de novo usuario</h5>
                             </div>
                             <div class="card-body">
                                 <form id="novoUsuario" method="post" action="novoUsuario.php">
-                                    
+                                    <input type="hidden" name="acao" value="salvar">
                                     <div class="row">
                                         <div class="col-sm">
                                             <div class="form-group">
@@ -103,12 +127,11 @@
                                                         <div class="input-group-text"><i class="bi-people-fill"></i></div>
                                                     </div>
                                                     <input id="nomeUsuario" type="text" size="60" class="form-control" 
-                                                    name="nomeUsuario" placeholder="Digite o seu nome" value="" required>
+                                                    name="nomeUsuario" placeholder="Digite o seu nome" value="<?= ($flagErro) ? $nomeUsuario : ""?>" required>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div class="row">
                                         <div class="col-sm">
                                             <div class="form-group">
@@ -118,11 +141,10 @@
                                                         <div class="input-group-text"><i class="bi-at"></i></div>
                                                     </div>
                                                     <input id="mailUsuario" type="email"  class="form-control" 
-                                                    name="mailUsuario" placeholder="Digite o seu email" value="" required>
+                                                    name="mailUsuario" placeholder="Digite o seu email" value="<?= ($flagErro) ? $mailUsuario : ""?>" required>
                                                 </div>
                                             </div>
                                         </div>
-                                     
                                         <div class="col-sm">
                                             <div class="form-group">
                                                 <label for="mail2Usuario">Repita o seu Email</label>
@@ -131,51 +153,33 @@
                                                         <div class="input-group-text"><i class="bi-at"></i></div>
                                                     </div>
                                                     <input id="mail2Usuario" type="email"  class="form-control" 
-                                                    name="mail2Usuario" placeholder="Repita o seu email" value="" required>
+                                                    name="mail2Usuario" placeholder="Repita o seu email" value="<?= ($flagErro) ? $mail2Usuario : ""?>" required>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                   
                                     <div class="row">
                                         <div class="col-sm">
                                             <div class="form-group">
-                                                <label for="senhaAtualUsuario">Senha Atual</label>
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <div class="input-group-text"><i class="bi-key-fill"></i></div>
-                                                    </div>
-                                                    <input id="senhaAtualUsuario" type="password"  class="form-control" 
-                                                    name="senhaAtualUsuario" placeholder="Digite a sua senha Atual" value="" required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm"></div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-sm">
-                                            <div class="form-group">
-                                                <label for="senhaUsuario">Nova Senha</label>
+                                                <label for="senhaUsuario">Senha</label>
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <div class="input-group-text"><i class="bi-key-fill"></i></div>
                                                     </div>
                                                     <input id="senhaUsuario" type="password"  class="form-control" 
-                                                    name="senhaUsuario" placeholder="Digite a sua nova senha" value="" required>
+                                                    name="senhaUsuario" placeholder="Digite a sua senha" value="<?= ($flagErro) ? $senhaUsuario : ""?>" required>
                                                 </div>
                                             </div>
                                         </div>
-                                        
                                         <div class="col-sm">
                                             <div class="form-group">
-                                                <label for="senha2Usuario">Repita a sua nova Senha </label>
+                                                <label for="senha2Usuario">Repita a sua Senha </label>
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <div class="input-group-text"><i class="bi-key-fill"></i></div>
                                                     </div>
                                                     <input id="senha2Usuario" type="password"  class="form-control" 
-                                                    name="senha2Usuario" placeholder="Repita a sua nova senha" value="" required>
+                                                    name="senha2Usuario" placeholder="Repita a sua senha" value="<?= ($flagErro) ? $senha2Usuario : ""?>" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -184,10 +188,9 @@
                                         <div class="col-sm barra_senha"></div>
                                         <div class="col-sm"></div>
                                     </div>
-                                    
                                     <div class="row">
                                         <div class="col-sm text-right">
-                                            <button class="btn btn-primary" type="submit">Salvar</button>
+                                            <button class="btn btn-primary" type="submit">Cadastrar</button>
                                         </div>
                                     </div>
                                 </form>
@@ -198,33 +201,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="modal fade" id="modalSobreAplicacao" tabindex="-1" role="dialog" aria-labelledby="sobreAplicacao"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="sobreAplicacao">Sobre</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <img src="img/logo.jpg" alt="logo">
-                        <hr>
-                        <p>Agenda de contatos</p>
-                        <p>Versão 1.0</p>
-                        <p>Todos os direitos reservados &copy: 2021 </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </body>
     <script>
-        
         jQuery.validator.setDefaults({
             errorElement: 'span',
             errorPlacement: function (error, element) {
@@ -243,7 +221,6 @@
         $(document).ready(() => {
             $("#novoUsuario").validate({
                 rules: {
-                    
                     nomeUsuario :{
                         minlength: 5
                     },
@@ -260,7 +237,6 @@
             });
 
         });
-        
         $(document).ready( () =>{
             let options = {};
             options.ui = {

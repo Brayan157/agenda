@@ -1,7 +1,7 @@
 <?php
     define('HOST', 'localhost');
     define('USER', 'root');
-    define('PASS', 'root');
+    define('PASS', '');
     define('DBNAME', 'agenda');
     define('PORT', '3306');
     $conexao = new pdo('mysql: host='.HOST.'; port='.PORT.'; dbname='.DBNAME,USER,PASS);
@@ -12,4 +12,5 @@
     // } catch (PDOException $exception) {
     //     echo "Erro ao conectar mo banco: ". $exception->getMessage();
     // }
+    
 ?>

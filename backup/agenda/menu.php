@@ -1,33 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Cadastro de Usuarios </title>
-    <link rel="stylesheet" href="css/bootstrap.css">
-    <link rel="stylesheet" href="css/bootstrap-icons.css">
-    <script src="js/jquery-3-3-1.js"></script>
-    <script src="js/bootstrap.bundle.js"></script>
-    <style>
-        html {
-            height: 100%;
-        }
-
-        body {
-            background: url('img/dark-blue-background.jpg') no-repeat center fixed;
-            background-size: cover;
-            height: 100%;
-            overflow-x: hidden;
-        }
-    </style>
-</head>
-
-<body>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
         <div class="container">
-            <a href="/main.html" class="navbar-brand"><img src="img/icone.svg" width="30" height="30"
+            <a href="main.php" class="navbar-brand"><img src="img/icone.svg" width="30" height="30"
                alt="agenda de contatos">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"> <span
@@ -40,10 +13,10 @@
                             <i class="bi-card-list"></i> Cadastros
                         </a>
                         <div class="dropdown-menu" aria-labelledby="menuCadastros">
-                            <a class="dropdown-item" href="cadastroContato.html">
+                            <a class="dropdown-item" href="cadastroContato.php">
                                 <i class="bi-person-fill"></i> Novo Contato
                             </a>
-                            <a class="dropdown-item" href="listaContatos.html">
+                            <a class="dropdown-item" href="listaContatos.php">
                                 <i class="bi-list-ul"></i> Lista de contatos
                             </a>
                         </div>
@@ -54,7 +27,7 @@
                             <i class="bi-gear-fill"></i> Minha Conta
                         </a>
                         <div class="dropdown-menu" aria-labelledby="menuConta">
-                            <a class="dropdown-item" href="alterarDados.html">
+                            <a class="dropdown-item" href="alterarDados.php">
                                 <i class="bi-pencil-square"></i> Alterar dados
                             </a>
                             <a class="dropdown-item" href="logout.php">
@@ -68,37 +41,19 @@
                         </a>
                     </li>
                 </ul>
-                <form action="listaContatos.html" class="form-inline my-2 my-lg-0" method="get">
+                <form action="listaContatos.php" class="form-inline my-2 my-lg-0" method="get">
                     <input class="form-control mr-sm-2" type="search" name="busca" id="busca" placeholder="Pesquisar">
                     <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Enviar</button>
                 </form>
-                <span></span>
+                <?php
+                if (isset($_SESSION['verificaUsuarioLogado'])) {
+                    $nomeUsuarioLogado = $_SESSION['nomeUsuarioLogado'];
+                ?>
+                    <span class="navbar-text ml-4">Olá <b><?=$nomeUsuarioLogado?></b>, Seja bem-vindo(a)!</span>
+                 <?php   
+                }
+                ?>
             </div>
         </div>
     </nav>
-    <div class="modal fade" id="modalSobreAplicacao" tabindex="-1" role="dialog" aria-labelledby="sobreAplicacao"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sobreAplicacao">Sobre</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <img src="img/logo.jpg" alt="logo">
-                    <hr>
-                    <p>Agenda de contatos</p>
-                    <p>Versão 1.0</p>
-                    <p>Todos os direitos reservados &copy: 2021 </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-
-</html>
+    

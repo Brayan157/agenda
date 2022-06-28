@@ -1,5 +1,13 @@
 <?php
-  include 'conectaBanco.php';  
+    session_start();
+    if (!isset($_SESSION['verificaUsuarioLogado'])) {
+        header("Location: index.php?codMSG=003");
+    }
+    else {
+        $codigoUsuarioLogado = $_SESSION['codigoUsuarioLogado'];
+        $nomeUsuarioLogado = $_SESSION['nomeUsuarioLogado'];
+        include 'conectaBanco.php';  
+    }
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -35,62 +43,187 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
-        <div class="container">
-            <a href="/main.html" class="navbar-brand"><img src="img/icone.svg" width="30" height="30"
-                    alt="agenda de contatos"></a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"> <span
-                    class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false" id="menuCadastros">
-                            <i class="bi-card-list"></i> Cadastros
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="menuCadastros">
-                            <a class="dropdown-item" href="cadastroContato.html">
-                                <i class="bi-person-fill"></i> Novo Contato
-                            </a>
-                            <a class="dropdown-item" href="listaContatos.html">
-                                <i class="bi-list-ul"></i> Lista de contatos
-                            </a>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false" id="menuConta">
-                            <i class="bi-gear-fill"></i> Minha Conta
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="menuConta">
-                            <a class="dropdown-item" href="alterarDados.html">
-                                <i class="bi-pencil-square"></i> Alterar dados
-                            </a>
-                            <a class="dropdown-item" href="logout.php">
-                                <i class="bi-door-open-fill"></i> Sair
-                            </a>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link " href="" data-toggle="modal" data-target="#modalSobreAplicacao">
-                            <i class="bi-info-circle"></i> Sobre
-                        </a>
-                    </li>
-                </ul>
-                <form action="listaContatos.html" class="form-inline my-2 my-lg-0" method="get">
-                    <input class="form-control mr-sm-2" type="search" name="busca" id="busca" placeholder="Pesquisar">
-                    <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Buscar</button>
-                </form>
-                <span></span>
-            </div>
-        </div>
-    </nav>
+<?php 
+    include "menu.php";
+?>
     <div class="row h-100 align-items-center">
         <div class="container my-5">
             <div class="row">
                 <div class="col-sm"></div>
                 <div class="col-sm-10">
+                <?php
+                            $flagErro = False;
+                            $flagSucesso = False;
+                            $mostrarMensagem = False;
+
+                            $dadosContato = array('codigoContato', 'nomeContato', 'nascimentoContato', 'sexoContato', 'mailContato', 'fotoContato', 'fotoAtualContato', 'telefone1Contato', 'telefone2Contato', 'telefone3Contato', 'telefone4Contato', 'logradouroContato', 'complementoContato', 'bairroContato', 'estadoContato', 'cidadeContato');
+
+                            foreach($dadosContato as $campo){
+                                $$campo = "";
+                            }
+
+                        if (isset($_POST['codigoContato'])) { //forme submetido (salvar)
+                            $codigoContato = $_POST['codigoContato'];
+                            $nomeContato = addslashes($_POST['nomeContato']);
+                            $nascimentoContato = $_POST['nascimentoContato'];
+
+                            if (isset($_POST['sexoContato'])) {
+                                $sexoContato = $_POST['sexoContato'];
+                            } else {
+                                $sexoContato = "";
+                            }
+
+                            $mailContato = $_POST['mailContato'];
+                            $fotoContato = $_FILES['fotoContato'];
+                            $fotoAtualContato = $_POST['fotoAtualContato'];
+                            $telefone1Contato = $_POST['telefone1Contato'];
+                            $telefone2Contato = $_POST['telefone2Contato'];
+                            $telefone3Contato = $_POST['telefone3Contato'];
+                            $telefone4Contato = $_POST['telefone4Contato'];
+                            $logradouroContato = addslashes( $_POST['logradouroContato']);
+                            $complementoContato = addslashes( $_POST['complementoContato']);
+                            $bairroContato = addslashes( $_POST['bairroContato']);
+                            $estadoContato = $_POST['estadoContato'];
+                            $cidadeContato  = $_POST['cidadeContato'];
+
+
+                            $telefonesContato = array($telefone1Contato, $telefone2Contato, $telefone3Contato, $telefone4Contato);
+
+                            $telefonesFiltradosContato = array_filter($telefonesContato);
+                            $telefonesValidadosContato = preg_grep('/^\(\d{2}\)\s\d{4,5}\-\d{4}$/', $telefonesContato);
+
+                            if ($telefonesFiltradosContato === $telefonesValidadosContato){
+                                $erroTelefones = False;
+                            } else {
+                                $erroTelefones = True;
+                            }
+
+                            if (empty($nomeContato) || empty($sexoContato) || empty($mailContato) || empty($telefone1Contato) || 
+                                empty($logradouroContato) || empty($complementoContato) || empty($bairroContato) || empty($cidadeContato) || 
+                                empty($estadoContato)) {
+                            
+                                $flagErro = True;
+                                $mensagemAcao = "Preencha todos os campos obrigatórios (*). ";
+
+                            } else if (strlen($nomeContato) < 5) {
+                                $flagErro = True;
+                                $mensagemAcao = "Informe a quantidade mínima de caracteres para cada campo: Nome (5).";
+                            } else if (!empty($nascimentoContato) && !preg_match('/^(0?[1-9]|[1,2][0-9]|[3[0,1])[\/](0?[1-9]|1[0,1,2])[\/]\d{4}$/', $nascimentoContato)) { //validação do nascimento
+                                $flagErro = True;
+                                $mensagemAcao = "A data de nascimento do contato deve ser no formato DD/MM/AAAA.";                               
+                            } else if (!preg_match("/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/", $mailContato)){
+                                $flagErro = True;
+                                $mensagemAcao = "Verifique o e-mail informado.";
+
+                            } else if ($fotoContato['error'] != 4) {
+                                if (!in_array($fotoContato['type'], array('image/jpg', 'image/jpeg', 'image/png', )) || $fotoContato['size'] > 2000000) {
+
+                                    $flagErro = True;
+                                    $mensagemAcao = "A foto do contato deve ser nos formatos JPG, JPEG ou PNG e ter no máximo 2MB.";
+
+                                } else {
+                                   list($larguraFoto, $alturaFoto) = getimagesize($fotoContato['tmp_name']);
+
+                                   if ($larguraFoto > 500 || $alturaFoto > 200) {
+                                    $flagErro = True;
+                                    $mensagemAcao = "As dimensões da foto devem ser no máximo 500x200 pixels.";
+                                   }
+                                }
+
+                            } else if ($erroTelefones) {
+                                $flagErro = True;
+                                $mensagemAcao = "Os campos de telefone devem ser no formato (xx) xxxxx-xxxx. ";
+                            
+                            }
+
+
+                            if (!$flagErro) {
+                                if (empty($codigoContato)) { // inclusão de contato
+                                    $sqlContato = "INSERT INTO contatos (codigoUsuario, nomeContato, nascimentoContato, sexoContato, mailContato, fotoContato, telefone1Contato, telefone2Contato, telefone3Contato, telefone4Contato, logradouroContato, complementoContato, bairroContato, cidadeContato, estadoContato) VALUES (:codigoUsuario, :nomeContato, :nascimentoContato, :sexoContato, :mailContato, :fotoContato, :telefone1Contato, :telefone2Contato, :telefone3Contato, :telefone4Contato, :logradouroContato, :complementoContato, :bairroContato, :cidadeContato, :estadoContato)";
+
+                                    $sqlContatoST = $conexao->prepare($sqlContato);
+
+                                    $sqlContatoST->bindValue(':codigoUsuario', $codigoUsuarioLogado);
+                                    $sqlContatoST->bindValue(':nomeContato', $nomeContato);
+
+                                    $nascimentoContato = formataData($nascimentoContato);
+                                    $sqlContatoST->bindValue(':nascimentoContato', $nascimentoContato);
+
+
+                                    $sqlContatoST->bindValue(':sexoContato', $sexoContato);
+                                    $sqlContatoST->bindValue(':mailContato', $mailContato);
+                                    $sqlContatoST->bindValue(':telefone1Contato', $telefone1Contato);
+                                    $sqlContatoST->bindValue(':telefone2Contato', $telefone2Contato);
+                                    $sqlContatoST->bindValue(':telefone3Contato', $telefone3Contato);
+                                    $sqlContatoST->bindValue(':telefone4Contato', $telefone4Contato);
+                                    $sqlContatoST->bindValue(':logradouroContato', $logradouroContato);
+                                    $sqlContatoST->bindValue(':complementoContato', $complementoContato);
+                                    $sqlContatoST->bindValue(':bairroContato', $bairroContato);
+                                    $sqlContatoST->bindValue(':cidadeContato', $cidadeContato);
+                                    $sqlContatoST->bindValue('estadoContato:', $estadoContato);
+
+                                    if ($fotoContato['error'] == 0) {
+                                        $extensaoFoto = pathinfo($fotoContato['name'], PATHINFO_EXTENSION);
+                                        $nomeFoto = "fotos/" . strtotime(date("Y-m-d H:i:s")) . $codigoUsuarioLogado . '.' . $extensaoFoto;
+
+                                        if (copy($fotoContato['tmp_name'], $nomeFoto)) {
+                                            $fotoEnviada = True;
+                                        } else {
+                                            $fotoEnviada = False;
+                                        }
+
+                                        $sqlContatoST->bindValue(':fotoContato', $nomeFoto);
+                                    } else {
+                                        $sqlContatoST->bindValue(':fotoContato', '');
+                                        $fotoEnviada = False;
+                                    }
+                                    if ($sqlContatoST->execute()) {
+                                        $flagSucesso = True;
+                                        $mensagemAcao = "Novo contato cadastrado com sucesso.";
+                                    } else {
+                                        $flagErro = True;
+                                        $mensagemAcao = "Erro ao cadastrar o novo contato. Código do erro: $sqlContatoST->errorCode( ).";
+
+                                        $nascimentoContato = formataData($nascimentoContato);
+
+                                        if ($fotoEnviada) {
+                                            unlink($nomeFoto);
+                                        }
+                                    }
+                                    
+                                    
+                                    }
+
+                                } else { //edição de contato existente
+
+                            }
+
+                        } else { //carregar dados
+                            if(isset($_GET['codigoContato'])) { // abrir contato existente
+
+                            } 
+                        }
+
+                        if ($flagErro) {
+                            $classeMensagem = "alert-danger";
+                            $mostrarMensagem = True;
+                        }   else if ($flagSucesso) {
+                            $classeMensagem = "alert-success";
+                            $mostrarMensagem = True;
+                        }
+
+                        if ($mostrarMensagem) {
+                            echo "<div class=\"alert $classeMensagem alert-dismissible fade show my-5\" role=\"alert\">
+                                    $mensagemAcao
+                                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Fechar\">
+                                        <span aria-hidden=\"true\">&times;</span>
+                                    </button>
+                                </div>";
+                        }
+                    ?>
                     <div class="card border-primary my-5">
+                    <input type ="hidden" name="codigoContato" value="">
+                    <input type ="hidden" name="fotoAtualContato" value="">
                         <div class="card-header bg-primary text-white">
                             <h5> Cadastro contato</h5>
                         </div>
@@ -109,21 +242,28 @@
                                                     <div class="input-group-text"><i class="bi-people-fill"></i></div>
                                                 </div>
                                                 <input id="nomeContato" type="text" size="60" class="form-control"
-                                                    name="nomeContato" placeholder="Digite o seu nome" value=""
+                                                    name="nomeContato" placeholder="Digite o seu nome" value="<?= $nomeContato ?>"
                                                     required>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="form-group">
-                                        <label for="fotoContato" class="form-label">Foto</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <div class="input-group-text"><i class="bi-people-fill"></i></div>
-                                            </div>
-                                            <input class="form-control" type="file" id="fotoContato" name="fotoContato" required>
-                                        </div>
-                                    </div>
+                                                    <label for="fotoContato">Foto</label>
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <div class="input-group-text">
+                                                                <i class="bi-file-earmark-person"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="custom-file">
+                                                            <input class="custom-file-input" type="file"
+                                                                name="fotoContato" id="fotoContato">
+                                                            <label class="custom-file-label" for="fotoContato">
+                                                                Escolha a foto...
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6">
@@ -134,7 +274,7 @@
                                                     <div class="input-group-text"><i class="bi-at"></i></div>
                                                 </div>
                                                 <input id="nascimentoContato" type="text" class="form-control date"
-                                                    name="nascimentoContato" placeholder="DD/MM/AAAA" required>
+                                                    name="nascimentoContato" placeholder="DD/MM/AAAA" value="<?= $nascimentoContato ?>" required>
                                             </div>
                                         </div>
                                     </div>
@@ -368,7 +508,7 @@
 
 
 
-
+    <?php include "modalApp.php";?>
 </body>
 <script>
     jQuery.validator.setDefaults({
