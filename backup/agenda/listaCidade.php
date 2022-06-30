@@ -16,6 +16,6 @@
 
         }
     }else {
-        header("location: cadastroContato.php");
+        // header("location: cadastroContato.php");
     }
 ?>

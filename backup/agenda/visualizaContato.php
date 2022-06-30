@@ -9,7 +9,7 @@
         include 'conectaBanco.php';
         include 'common/formataData.php';
 
-        $codigoUsuarioLogado = $_SESSION['codigoUsuarioLogado'];
+        $codigoUsuarioLogado = $_SESSION['CodigoUsuarioLogado'];
 
         if (isset($_GET['codigoContato'])) {
             $codigoContato = $_GET['codigoContato'];
@@ -76,7 +76,7 @@
                         <div class=\"col-sm\">
                             <div class=\"row\">
                                 <div class=\"col-sm\">
-                                    <img src\"$fotoContato\" alt=\"$nomeContato\">
+                                    <img src=\"$fotoContato\" alt=\"$nomeContato\">
                                 </div>
                             </div>
                         </div>

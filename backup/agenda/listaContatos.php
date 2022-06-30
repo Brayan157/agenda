@@ -33,13 +33,38 @@
 <body>
     <?php include "main.php"; 
         include "conectaBanco.php";
-        $codigoUsuarioLogado = $_SESSION['codigoUsuarioLogado'];
+        $codigoUsuarioLogado = $_SESSION['CodigoUsuarioLogado'];
     ?>
 
     <div class="h-100 row align-items-center pt-5">
         <div class="container">
             <div class="row">
-                <div class="col-sm"></div>
+                <div class="col-sm">
+                    <?php
+                        if (isset($_GET['codMSG'])) {
+                            $codmsg = $_GET['codMSG'];
+                            switch ($codmsg) {
+                                case '001':
+                                    $classMensagem = "alert-danger";
+                                    $textoMensagem = "Erro ao excluir contato.";
+                                    break;
+                                
+                                case '002':
+                                    $classMensagem = "alert-success";
+                                    $textoMensagem = "Contato excluido com sucesso";
+                                    break;
+                            }
+                            if (!empty($textoMensagem)) {
+                                echo "<div class=\"alert $classMensagem alert-dismissible fade show\" role=\"alert\">
+                                    $textoMensagem
+                                    <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\">
+                                    <span aria-hidden=\"true\">&times;</span>
+                                    </button>
+                                </div>";
+                            }
+                        }
+                    ?>
+                </div>
                 <div class="col-sm-12">
                     <div class="card border-primary my-5">
                         <div class="card-header bg-primary text-white">
@@ -96,10 +121,10 @@
                                                             data-target=\"#visualizarContato\" data-whatever=\"$codigoContato\">
                                                             <i class=\"bi-eye\"></i> Visualizar
                                                         </a>
-                                                        <a class=\"dropdown-item\" href=\"cadastroContato.php\">
+                                                        <a class=\"dropdown-item\" href=\"cadastroContato.php?codigoContato=$codigoContato\">
                                                             <i class=\"bi-pencil\"></i> Editar
                                                         </a>
-                                                        <a class=\"dropdown-item\" href=\"#\">
+                                                        <a class=\"dropdown-item\" href=\"excluirContato.php?excluir=$codigoContato\">
                                                             <i class=\"bi-trash\"></i> Excluir
                                                         </a>
                                                     </div>

@@ -9,5 +9,5 @@
         }
     }
 
-    // echo formataData("2022-09-19");
+    echo formataData("2022-09-19");
 ?>
